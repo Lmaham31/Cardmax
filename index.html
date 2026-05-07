@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CardMax">
+<meta name="theme-color" content="#f2f2f7">
+<title>CardMax</title>
+<link rel="manifest" href="manifest.json">
+<style>
+/* ── APPLE SYSTEM TOKENS ── */
+:root {
+  --bg:           #f2f2f7;
+  --bg2:          #ffffff;
+  --bg3:          #e5e5ea;
+  --label:        #000000;
+  --label2:       #3c3c43cc;
+  --label3:       #3c3c4399;
+  --label4:       #3c3c4360;
+  --separator:    #3c3c4349;
+  --blue:         #007aff;
+  --blue-bg:      #007aff18;
+  --green:        #34c759;
+  --green-bg:     #34c75918;
+  --orange:       #ff9f0a;
+  --red:          #ff3b30;
+  --gray:         #8e8e93;
+  --gray2:        #aeaeb2;
+  --gray3:        #c7c7cc;
+  --gray4:        #d1d1d6;
+  --gray5:        #e5e5ea;
+  --gray6:        #f2f2f7;
+  --safe-t:       env(safe-area-inset-top);
+  --safe-b:       env(safe-area-inset-bottom);
+  --radius-sm:    10px;
+  --radius-md:    13px;
+  --radius-lg:    16px;
+  --radius-xl:    20px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--label);
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── LAYOUT ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ── NAVIGATION BAR ── */
+.nav-bar {
+  padding-top: calc(var(--safe-t) + 12px);
+  padding-bottom: 8px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background: rgba(242,242,247,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 10;
+}
+.nav-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  color: var(--label);
+}
+.nav-badge {
+  font-size: 13px;
+  color: var(--blue);
+  font-weight: 500;
+}
+
+/* ── SEGMENT CONTROL ── */
+.segment-wrap {
+  padding: 8px 16px 10px;
+  background: rgba(242,242,247,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
+  flex-shrink: 0;
+}
+.segment {
+  display: flex;
+  background: var(--gray3);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 2px;
+}
+.seg-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  padding: 6px 0;
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label2);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.2px;
+}
+.seg-btn.active {
+  background: var(--bg2);
+  color: var(--label);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* ── SCROLL CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: calc(var(--safe-b) + 16px);
+}
+.content::-webkit-scrollbar { display: none; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── SECTION HEADERS (iOS grouped style) ── */
+.section-header {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--label3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 18px 20px 6px;
+}
+.section-footer {
+  font-size: 13px;
+  color: var(--label3);
+  padding: 6px 20px 18px;
+  line-height: 1.4;
+}
+
+/* ── GROUPED LIST ── */
+.list-group {
+  background: var(--bg2);
+  margin: 0 16px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.list-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 14px;
+  border-bottom: 0.5px solid var(--separator);
+  background: var(--bg2);
+  min-height: 52px;
+  animation: rowIn 0.22s ease;
+}
+@keyframes rowIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+.list-row:last-child { border-bottom: none; }
+
+/* card swatch */
+.swatch {
+  width: 40px;
+  height: 26px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+.swatch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 55%);
+}
+
+.row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.row-info { flex: 1; min-width: 0; }
+.row-title {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--label);
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-subtitle {
+  font-size: 13px;
+  color: var(--label3);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.row-value {
+  font-size: 17px;
+  color: var(--label3);
+}
+.row-chevron {
+  color: var(--gray3);
+  font-size: 14px;
+  margin-right: -4px;
+}
+.remove-row {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gray5);
+  border: none;
+  color: var(--gray);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.remove-row:active { background: #ff3b3020; color: var(--red); }
+
+/* rotating tag */
+.rotating-pill {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--orange);
+  background: #ff9f0a18;
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+/* ── SELECT ROW ── */
+.select-row {
+  display: flex;
+  align-items: center;
+  background: var(--bg2);
+  border-radius: var(--radius-lg);
+  margin: 0 16px;
+  overflow: hidden;
+  position: relative;
+}
+.select-row select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 14px 40px 14px 16px;
+  font-family: -apple-system, sans-serif;
+  font-size: 17px;
+  color: var(--label);
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  letter-spacing: -0.3px;
+}
+.select-row::after {
+  content: '⌄';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-52%);
+  color: var(--gray3);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+/* ── APPLE BUTTON ── */
+.btn-primary {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 12px 16px 0;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  font-family: -apple-system, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary:active { opacity: 0.75; }
+
+/* ── ASK VIEW ── */
+.ask-hero {
+  padding: 20px 16px 0;
+}
+.ask-heading {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: var(--label);
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+.ask-heading span { color: var(--blue); }
+
+/* search field */
+.search-wrap {
+  background: var(--bg2);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  margin-bottom: 12px;
+}
+.search-icon { font-size: 17px; color: var(--gray); flex-shrink: 0; }
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 14px 0;
+  font-family: -apple-system, sans-serif;
+  font-size: 17px;
+  color: var(--label);
+  outline: none;
+  letter-spacing: -0.3px;
+}
+.search-input::placeholder { color: var(--gray2); }
+.search-go {
+  width: 32px;
+  height: 32px;
+  background: var(--blue);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+  font-weight: 600;
+}
+.search-go:active { opacity: 0.7; }
+.search-go.loading { background: var(--gray4); pointer-events: none; }
+
+/* mode toggle */
+.mode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.mode-pill {
+  background: var(--bg2);
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-family: -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label3);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.mode-pill.active {
+  background: var(--blue-bg);
+  color: var(--blue);
+}
+
+/* chips */
+.chips-section { margin-bottom: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: var(--bg2);
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-family: -apple-system, sans-serif;
+  font-size: 15px;
+  color: var(--label2);
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.chip:active { opacity: 0.6; transform: scale(0.96); }
+
+/* ── LIVE BANNER ── */
+.live-banner {
+  margin: 12px 16px 0;
+  background: var(--bg2);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--label3);
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+.live-dot.pulse { animation: livepulse 1s infinite; }
+@keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.live-banner.done .live-dot { background: var(--green); animation: none; }
+
+/* ── RANKED RESULTS ── */
+.results-group {
+  background: var(--bg2);
+  margin: 12px 16px 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  gap: 13px;
+  border-bottom: 0.5px solid var(--separator);
+  animation: rowIn 0.25s ease both;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row:nth-child(2) { animation-delay: 0.04s; }
+.result-row:nth-child(3) { animation-delay: 0.08s; }
+.result-row:nth-child(n+4) { animation-delay: 0.11s; }
+
+.result-row.winner { background: var(--bg2); }
+
+/* rank number */
+.rank-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: -apple-system, sans-serif;
+}
+.rank-1 { background: var(--blue-bg); color: var(--blue); }
+.rank-2 { background: var(--gray5); color: var(--gray); }
+.rank-3 { background: var(--gray5); color: var(--gray); }
+.rank-n { background: var(--gray5); color: var(--gray2); }
+
+.result-info { flex: 1; min-width: 0; }
+.result-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--label);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-cat {
+  font-size: 13px;
+  color: var(--label3);
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.live-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--orange);
+  background: #ff9f0a15;
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.03em;
+}
+
+.result-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.result-rate {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: -apple-system, sans-serif;
+  letter-spacing: -0.5px;
+}
+.rate-1 { color: var(--blue); }
+.rate-2 { color: var(--label2); }
+.rate-3 { color: var(--label2); }
+.rate-n { color: var(--label3); }
+.result-earn {
+  font-size: 11px;
+  color: var(--label4);
+  margin-top: 1px;
+}
+
+/* winner hero bar */
+.winner-bar {
+  background: var(--blue-bg);
+  padding: 9px 16px;
+  border-top: 0.5px solid #007aff20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.winner-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue);
+}
+.winner-earn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+}
+
+/* ── AI BOX ── */
+.ai-box {
+  background: var(--bg2);
+  margin: 10px 16px 0;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  animation: rowIn 0.25s ease;
+}
+.ai-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.ai-body {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--label2);
+  letter-spacing: -0.2px;
+}
+.typing-dots { display: flex; gap: 4px; align-items: center; }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); opacity: 0.3; animation: td 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes td { 0%,80%,100%{opacity:0.2} 40%{opacity:0.9} }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 48px 32px 24px;
+  color: var(--label3);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; display: block; }
+.empty-title { font-size: 20px; font-weight: 600; color: var(--label2); margin-bottom: 6px; letter-spacing: -0.4px; }
+.empty-sub { font-size: 15px; color: var(--label3); line-height: 1.5; }
+.btn-go-wallet {
+  display: inline-block;
+  margin-top: 18px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 22px;
+  font-family: -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-go-wallet:active { opacity: 0.75; }
+
+/* ── SPINNER ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Nav Bar -->
+  <div class="nav-bar">
+    <div style="width:60px"></div>
+    <div class="nav-title">CardMax</div>
+    <div class="nav-badge" id="wallet-count"></div>
+  </div>
+
+  <!-- Segment Control -->
+  <div class="segment-wrap">
+    <div class="segment">
+      <button class="seg-btn active" id="seg-wallet" onclick="switchTab('wallet')">Wallet</button>
+      <button class="seg-btn" id="seg-ask" onclick="switchTab('ask')">Ask</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- WALLET VIEW -->
+    <div class="view active" id="view-wallet">
+      <div class="section-header">Add a card</div>
+      <div class="select-row">
+        <select id="card-select"><option value="">Choose a card…</option></select>
+      </div>
+      <button class="btn-primary" onclick="addCard()">Add to Wallet</button>
+
+      <div class="section-header" id="my-cards-header" style="display:none">My cards</div>
+      <div class="list-group" id="my-cards" style="display:none"></div>
+      <div class="section-footer" id="my-cards-footer" style="display:none">Cards marked ↻ have rotating quarterly bonus categories. CardMax looks these up live when you search.</div>
+
+      <div id="empty-wallet" style="padding-top:8px">
+        <div class="empty-state">
+          <span class="empty-icon">💳</span>
+          <div class="empty-title">No cards yet</div>
+          <div class="empty-sub">Add your credit cards above to get personalized cash back recommendations.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASK VIEW -->
+    <div class="view" id="view-ask">
+      <div class="ask-hero">
+        <div class="ask-heading">What are you<br><span>buying?</span></div>
+        <div class="search-wrap">
+          <div class="search-icon">🔍</div>
+          <input class="search-input" id="ask-input" type="text" placeholder="Groceries, gas, dining…" autocomplete="off" autocorrect="off" spellcheck="false" />
+          <button class="search-go" id="ask-go" onclick="doAsk()">→</button>
+        </div>
+        <div class="mode-row">
+          <button class="mode-pill active" id="pill-quick" onclick="setMode('quick')">⚡ Quick</button>
+          <button class="mode-pill" id="pill-ai" onclick="setMode('ai')">✦ AI Explain</button>
+        </div>
+        <div class="chips-section">
+          <div class="section-header" style="padding-left:0;padding-top:0;padding-bottom:10px">Suggestions</div>
+          <div class="chips">
+            <button class="chip" onclick="fillChip('groceries')">🛒 Groceries</button>
+            <button class="chip" onclick="fillChip('gas station')">⛽ Gas</button>
+            <button class="chip" onclick="fillChip('restaurants')">🍽 Dining</button>
+            <button class="chip" onclick="fillChip('flights')">✈️ Flights</button>
+            <button class="chip" onclick="fillChip('hotel')">🏨 Hotels</button>
+            <button class="chip" onclick="fillChip('streaming')">📺 Streaming</button>
+            <button class="chip" onclick="fillChip('Amazon')">📦 Amazon</button>
+            <button class="chip" onclick="fillChip('Uber')">🚗 Uber</button>
+            <button class="chip" onclick="fillChip('pharmacy')">💊 Pharmacy</button>
+            <button class="chip" onclick="fillChip('rent')">🏠 Rent</button>
+          </div>
+        </div>
+      </div>
+      <div id="result-section"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const CARDS = [
+  { id:"amex-gold",    name:"Amex Gold",                 issuer:"American Express", color:"#C8A84B", rotating:false, categories:{"restaurants":4,"groceries":4,"flights":3,"travel":3,"everything else":1} },
+  { id:"amex-plat",   name:"Amex Platinum",              issuer:"American Express", color:"#9EA3A6", rotating:false, categories:{"flights":5,"hotels":5,"travel":5,"everything else":1} },
+  { id:"amex-bce",    name:"Amex Blue Cash Everyday",    issuer:"American Express", color:"#2563EB", rotating:false, categories:{"groceries":3,"gas":2,"online retail":3,"everything else":1} },
+  { id:"amex-bcp",    name:"Amex Blue Cash Preferred",   issuer:"American Express", color:"#1D4ED8", rotating:false, categories:{"groceries":6,"streaming":6,"gas":3,"transit":3,"everything else":1} },
+  { id:"chase-sp",    name:"Chase Sapphire Preferred",   issuer:"Chase",            color:"#1a3a6b", rotating:false, categories:{"travel":3,"dining":3,"streaming":3,"online groceries":3,"everything else":1} },
+  { id:"chase-sr",    name:"Chase Sapphire Reserve",     issuer:"Chase",            color:"#1e2d4a", rotating:false, categories:{"travel":3,"dining":3,"everything else":1} },
+  { id:"chase-flex",  name:"Chase Freedom Flex",         issuer:"Chase",            color:"#0E7490", rotating:true,  categories:{"dining":3,"drugstore":3,"everything else":1} },
+  { id:"chase-cfu",   name:"Chase Freedom Unlimited",    issuer:"Chase",            color:"#0369A1", rotating:false, categories:{"travel":5,"dining":3,"drugstore":3,"everything else":1.5} },
+  { id:"citi-dc",     name:"Citi Double Cash",           issuer:"Citi",             color:"#374151", rotating:false, categories:{"everything else":2} },
+  { id:"citi-cc",     name:"Citi Custom Cash",           issuer:"Citi",             color:"#4B5563", rotating:false, categories:{"top category":5,"everything else":1} },
+  { id:"discover-it", name:"Discover it Cash Back",      issuer:"Discover",         color:"#D97706", rotating:true,  categories:{"everything else":1} },
+  { id:"cap1-vx",     name:"Capital One Venture X",      issuer:"Capital One",      color:"#6D28D9", rotating:false, categories:{"travel":5,"hotels":10,"flights":5,"everything else":2} },
+  { id:"cap1-savor",  name:"Capital One Savor",          issuer:"Capital One",      color:"#7C3AED", rotating:false, categories:{"dining":3,"entertainment":3,"grocery":3,"streaming":3,"everything else":1} },
+  { id:"cap1-qs",     name:"Capital One Quicksilver",    issuer:"Capital One",      color:"#5B21B6", rotating:false, categories:{"everything else":1.5} },
+  { id:"wells-auto",  name:"Wells Fargo Autograph",      issuer:"Wells Fargo",      color:"#B91C1C", rotating:false, categories:{"gas":3,"travel":3,"dining":3,"streaming":3,"transit":3,"phone":3,"everything else":1} },
+  { id:"bilt",        name:"Bilt Mastercard",            issuer:"Bilt",             color:"#2a2a3a", rotating:false, categories:{"rent":1,"dining":3,"travel":2,"everything else":1} },
+  { id:"usbank-ago",  name:"US Bank Altitude Go",        issuer:"US Bank",          color:"#15803D", rotating:false, categories:{"dining":4,"streaming":2,"grocery":2,"gas":2,"everything else":1} },
+  { id:"apple-card",  name:"Apple Card",                 issuer:"Goldman Sachs",    color:"#1c1c1e", rotating:false, categories:{"apple":3,"dining":2,"everything else":1} },
+  { id:"boa-custom",  name:"BofA Customized Cash",       issuer:"Bank of America",  color:"#c0392b", rotating:false, categories:{"chosen category":3,"grocery":2,"everything else":1} },
+  { id:"paypal-cb",   name:"PayPal Cashback MC",         issuer:"Synchrony",        color:"#003087", rotating:false, categories:{"everything else":2} },
+];
+
+let myCards = [];
+let mode = 'quick';
+let rotatingCache = {};
+
+function saveWallet(){ try{ localStorage.setItem('cardmax-wallet', JSON.stringify(myCards.map(c=>c.id))); }catch(e){} }
+function loadWallet(){ try{ const s=JSON.parse(localStorage.getItem('cardmax-wallet')||'[]'); myCards=s.map(id=>CARDS.find(c=>c.id===id)).filter(Boolean); }catch(e){ myCards=[]; } }
+function saveCache(){ try{ localStorage.setItem('cardmax-rcache', JSON.stringify(rotatingCache)); }catch(e){} }
+function loadCache(){ try{ rotatingCache=JSON.parse(localStorage.getItem('cardmax-rcache')||'{}'); }catch(e){ rotatingCache={}; } }
+
+// populate select
+const sel = document.getElementById('card-select');
+CARDS.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(c=>{
+  const o=document.createElement('option'); o.value=c.id; o.textContent=c.name+(c.rotating?' ↻':''); sel.appendChild(o);
+});
+loadWallet(); loadCache(); renderWallet();
+
+function switchTab(t){
+  ['wallet','ask'].forEach(x=>{
+    document.getElementById('view-'+x).classList.toggle('active',x===t);
+    document.getElementById('seg-'+x).classList.toggle('active',x===t);
+  });
+}
+function setMode(m){ mode=m; document.getElementById('pill-quick').classList.toggle('active',m==='quick'); document.getElementById('pill-ai').classList.toggle('active',m==='ai'); }
+function fillChip(text){ document.getElementById('ask-input').value=text; doAsk(); }
+
+function addCard(){
+  const val=sel.value; if(!val) return;
+  if(myCards.find(c=>c.id===val)){ sel.value=''; return; }
+  const card=CARDS.find(c=>c.id===val); if(!card) return;
+  myCards.push(card); sel.value=''; saveWallet(); renderWallet();
+}
+function removeCard(id){ myCards=myCards.filter(c=>c.id!==id); saveWallet(); renderWallet(); }
+
+function renderWallet(){
+  const count=myCards.length;
+  const countEl=document.getElementById('wallet-count');
+  countEl.textContent = count ? count+(count===1?' Card':' Cards') : '';
+  const hdr=document.getElementById('my-cards-header');
+  const el=document.getElementById('my-cards');
+  const ftr=document.getElementById('my-cards-footer');
+  const emp=document.getElementById('empty-wallet');
+  if(!count){ hdr.style.display='none'; el.style.display='none'; ftr.style.display='none'; emp.style.display=''; return; }
+  hdr.style.display=''; el.style.display=''; ftr.style.display=''; emp.style.display='none';
+  el.innerHTML=myCards.map(c=>`
+    <div class="list-row">
+      <div class="swatch" style="background:${c.color}"></div>
+      <div class="row-info">
+        <div class="row-title">${c.name}</div>
+        <div class="row-subtitle">${c.issuer}${c.rotating?' &nbsp;<span class="rotating-pill">↻ rotating</span>':''}</div>
+      </div>
+      <button class="remove-row" onclick="removeCard('${c.id}')">×</button>
+    </div>`).join('');
+}
+
+// SCORING
+const KW={
+  grocery:  ["grocer","grocery","supermarket","whole foods","kroger","safeway","trader joe","aldi","publix","wegman"],
+  dining:   ["restaurant","dining","lunch","dinner","breakfast","coffee","cafe","starbucks","mcdonald","pizza","sushi","bar","takeout","doordash","ubereats","grubhub","chipotle","chick-fil","wendy"],
+  gas:      ["gas","fuel","station","shell","bp","exxon","chevron","sunoco"],
+  travel:   ["travel","hotel","flight","airline","airbnb","booking","expedia","uber","lyft","airport","motel","car rental","cruise"],
+  flights:  ["flight","airline","delta","united","american airlines","southwest","spirit"],
+  hotels:   ["hotel","marriott","hilton","hyatt","airbnb","motel"],
+  streaming:["netflix","hulu","spotify","disney","hbo","streaming","apple tv","peacock","paramount"],
+  online:   ["amazon","ebay","etsy","walmart.com"],
+  transit:  ["subway","metro","transit","bus","commute","mta"],
+  entertainment:["movie","theater","concert","ticketmaster","amc","event"],
+  drugstore:["pharmacy","cvs","walgreens","rite aid","drug"],
+  phone:    ["phone bill","verizon","att","t-mobile","wireless"],
+  rent:     ["rent","landlord","apartment"],
+  apple:    ["apple store","iphone","ipad","mac","app store"],
+};
+const ALIASES={
+  grocery:["groceries","grocery","online groceries"],dining:["restaurants","dining"],gas:["gas"],
+  travel:["travel"],flights:["flights","travel"],hotels:["hotels","travel"],streaming:["streaming"],
+  online:["online retail"],transit:["transit"],entertainment:["entertainment"],drugstore:["drugstore"],
+  phone:["phone"],rent:["rent"],apple:["apple","apple purchases"],
+};
+
+function scoreCard(card,q,liveCats){
+  const cats=Object.assign({},card.categories,liveCats||{});
+  let best={rate:cats["everything else"]||1,cat:"everything else",live:false};
+  for(const [key,words] of Object.entries(KW)){
+    if(words.some(w=>q.includes(w))){
+      for(const alias of (ALIASES[key]||[key])){
+        if(cats[alias]&&cats[alias]>best.rate) best={rate:cats[alias],cat:alias,live:!!(liveCats&&liveCats[alias]!==undefined)};
+      }
+    }
+  }
+  return best;
+}
+
+const CACHE_TTL=7*24*60*60*1000;
+function cacheValid(id){ const e=rotatingCache[id]; return e&&(Date.now()-e.at)<CACHE_TTL; }
+
+async function fetchRotating(card){
+  if(cacheValid(card.id)) return rotatingCache[card.id].cats;
+  const now=new Date();
+  const q=`Q${Math.ceil((now.getMonth()+1)/3)} ${now.getFullYear()}`;
+  const prompt=`Search for the current ${q} rotating 5% cash back bonus categories for the ${card.name} credit card. Return ONLY a valid JSON object mapping simple lowercase category names to their cash back rate as a number. Example: {"groceries":5,"gas":5}. If not found return {}. No other text.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,tools:[{type:"web_search_20250305",name:"web_search"}],messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.find(b=>b.type==='text')?.text?.trim()||'{}';
+    const parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    rotatingCache[card.id]={cats:parsed,at:Date.now()}; saveCache(); return parsed;
+  }catch(e){ return {}; }
+}
+
+async function doAsk(){
+  const query=document.getElementById('ask-input').value.trim();
+  if(!query) return;
+  const area=document.getElementById('result-section');
+  if(!myCards.length){
+    area.innerHTML=`<div style="padding:0 16px;margin-top:12px"><div class="empty-state" style="padding-top:32px"><span class="empty-icon">💳</span><div class="empty-title">No cards added</div><div class="empty-sub">Add cards to your wallet first, then ask which one to use.</div><button class="btn-go-wallet" onclick="switchTab('wallet')">Go to Wallet</button></div></div>`;
+    return;
+  }
+  const goBtn=document.getElementById('ask-go');
+  goBtn.classList.add('loading'); goBtn.innerHTML='<div class="spinner"></div>';
+  const q=query.toLowerCase();
+  const rotCards=myCards.filter(c=>c.rotating);
+  if(rotCards.length){
+    area.innerHTML=`<div class="live-banner" id="live-banner"><div class="live-dot pulse" id="live-dot"></div><span id="live-txt">Checking current rotating categories…</span></div>`;
+  } else { area.innerHTML=''; }
+
+  const liveData={};
+  if(rotCards.length){
+    await Promise.all(rotCards.map(async c=>{ liveData[c.id]=await fetchRotating(c); }));
+    const dot=document.getElementById('live-dot');
+    const txt=document.getElementById('live-txt');
+    const banner=document.getElementById('live-banner');
+    if(dot) dot.classList.remove('pulse');
+    if(banner) banner.classList.add('done');
+    if(txt) txt.textContent=`Live data loaded for ${rotCards.map(c=>c.name).join(', ')}`;
+  }
+
+  const results=myCards.map(card=>{
+    const live=liveData[card.id]||null;
+    const {rate,cat,live:isLive}=scoreCard(card,q,live);
+    return{card,rate,cat,isLive};
+  }).sort((a,b)=>b.rate-a.rate);
+
+  const rnClass=i=>['rank-1','rank-2','rank-3','rank-n'][Math.min(i,3)];
+  const rtClass=i=>['rate-1','rate-2','rate-3','rate-n'][Math.min(i,3)];
+  const rnLabel=i=>i===0?'1':i===1?'2':i===2?'3':`${i+1}`;
+
+  const winner=results[0];
+  const rowsHTML=results.map((r,i)=>`
+    <div class="result-row${i===0?' winner':''}">
+      <div class="rank-num ${rnClass(i)}">${rnLabel(i)}</div>
+      <div class="swatch" style="background:${r.card.color}"></div>
+      <div class="result-info">
+        <div class="result-name">${r.card.name}</div>
+        <div class="result-cat">${r.cat}${r.isLive?' <span class="live-tag">LIVE</span>':''}</div>
+      </div>
+      <div class="result-right">
+        <div class="result-rate ${rtClass(i)}">${r.rate}%</div>
+        <div class="result-earn">$${r.rate.toFixed(2)} / $100</div>
+      </div>
+    </div>`).join('');
+
+  const bannerEl=document.getElementById('live-banner');
+  const bannerOuter=bannerEl?bannerEl.outerHTML:'';
+  area.innerHTML=bannerOuter+
+    `<div class="results-group">${rowsHTML}<div class="winner-bar"><div class="winner-label">Best for "${query}"</div><div class="winner-earn">${winner.card.name} · ${winner.rate}% back</div></div></div>`+
+    (mode==='ai'?`<div class="ai-box" id="ai-box"><div class="ai-label">AI Explanation</div><div class="ai-body" id="ai-body"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`:'');
+
+  goBtn.classList.remove('loading'); goBtn.innerHTML='→';
+
+  if(mode==='ai'){
+    const cardList=results.map((r,i)=>`${i+1}. ${r.card.name}: ${r.rate}% on "${r.cat}"${r.isLive?' (live rotating bonus)':''}`).join('\n');
+    const prompt=`User choosing a card for: "${query}".\n\nRanked cards:\n${cardList}\n\nWrite 2-3 concise, friendly sentences explaining why #1 wins. Mention rotating category if relevant. Quick tip if useful. Plain text, no markdown.`;
+    try{
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:250,stream:true,messages:[{role:'user',content:prompt}]})});
+      const bodyEl=document.getElementById('ai-body'); if(bodyEl) bodyEl.innerHTML='';
+      const reader=resp.body.getReader(); const dec=new TextDecoder(); let buf='';
+      while(true){
+        const {done,value}=await reader.read(); if(done) break;
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n'); buf=lines.pop();
+        for(const line of lines){
+          if(!line.startsWith('data:')) continue;
+          const d=line.slice(5).trim(); if(d==='[DONE]') break;
+          try{ const j=JSON.parse(d); if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){ const b=document.getElementById('ai-body'); if(b) b.textContent+=j.delta.text; } }catch{}
+        }
+      }
+    }catch(e){ const b=document.getElementById('ai-body'); if(b) b.textContent='AI explanation unavailable right now.'; }
+  }
+}
+
+document.getElementById('ask-input').addEventListener('keydown',e=>{ if(e.key==='Enter') doAsk(); });
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
+</script>
+</body>
+</html>
